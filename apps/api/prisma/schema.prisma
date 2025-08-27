@@ -21,6 +21,17 @@ model Transaction {
   hash        String   @unique
   blockNumber Int
   timestamp   DateTime
-  contract    Contract @relation(fields: [contractId], references: [id])
+
+  // Optional additional fields:
+  fromAddress String
+  toAddress   String?
+  valueWei    String?   // or Decimal/BigInt if you prefer
+
+  contract    Contract  @relation(fields: [contractId], references: [id])
   contractId  String
+
+  @@index([blockNumber])
+  @@index([contractId])
+  @@index([fromAddress])
+  @@index([toAddress])
 }
