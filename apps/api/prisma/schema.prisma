@@ -1,0 +1,26 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Contract {
+  id        String        @id @default(cuid())
+  address   String        @unique
+  chain     String
+  name      String?
+  createdAt DateTime      @default(now())
+  txs       Transaction[]
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  hash        String   @unique
+  blockNumber Int
+  timestamp   DateTime
+  contract    Contract @relation(fields: [contractId], references: [id])
+  contractId  String
+}
