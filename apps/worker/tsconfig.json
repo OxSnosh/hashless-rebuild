@@ -1,2 +1,11 @@
-{ "extends": "../../packages/config/tsconfig.base.json",
-  "compilerOptions": { "outDir": "dist" }, "include": ["src"] }
+{
+    "extends": "../../packages/config/tsconfig.base.json",
+    "compilerOptions": {
+      "outDir": "dist",
+      "rootDir": ".",
+      "noEmit": false
+    },
+    "include": ["**/*.ts"],
+    "exclude": ["dist", "node_modules"],
+    "ts-node": { "esm": true, "transpileOnly": true }
+  }

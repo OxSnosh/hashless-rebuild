@@ -1,6 +1,7 @@
 {
   "name": "hashless-rebuild",
   "private": true,
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev:web": "pnpm --filter @app/web dev",
     "dev:api": "pnpm --filter @app/api dev",
@@ -9,10 +10,13 @@
     "db:up": "docker compose -f infra/compose.yml up -d",
     "db:down": "docker compose -f infra/compose.yml down -v",
     "prisma:push": "pnpm --filter @app/api prisma db push",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "postinstall": "prisma generate --schema ./apps/api/prisma/schema.prisma"
   },
   "devDependencies": {
     "concurrently": "^9.0.0",
-    "typescript": "^5.5.0"
-  }
+    "typescript": "^5.5.0",
+    "prisma": "^5.16.0"
+  },
+  "prisma": { "schema": "./apps/api/prisma/schema.prisma" }
 }
