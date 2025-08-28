@@ -1,11 +1,12 @@
-"use client";
+'use client';
 
-import { ApolloProvider, ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
-import fetch from "cross-fetch";
+import { ApolloClient, InMemoryCache, HttpLink, ApolloProvider } from '@apollo/client';
 
 const client = new ApolloClient({
-  // change this to your API URL (or use NEXT_PUBLIC_GRAPHQL_URL)
-  link: new HttpLink({ uri: "/api/graphql", fetch }),
+  link: new HttpLink({
+    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL ?? 'http://localhost:4000/graphql',
+    fetchOptions: { cache: 'no-store' },
+  }),
   cache: new InMemoryCache(),
 });
 
