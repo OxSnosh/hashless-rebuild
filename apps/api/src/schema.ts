@@ -1,28 +1,24 @@
-import { gql } from "apollo-server-express";
+import gql from "graphql-tag";
 
 export const typeDefs = gql`
-  scalar BigInt
-  scalar DateTime
-
   type Contract {
     id: ID!
     address: String!
     chain: String!
     name: String
-    createdAt: DateTime!
+    createdAt: String!
   }
 
   type Transaction {
     id: ID!
     hash: String!
-    blockNumber: String!
-    from: String!
-    to: String!
-    token: String
-    amount: String!
-    timestamp: DateTime!
-    chain: String!
-    contractId: ID
+    blockNumber: Int!
+    timestamp: String!
+    fromAddress: String!
+    toAddress: String
+    valueWei: String
+    contractId: ID!
+    contract: Contract
   }
 
   type Query {
