@@ -1,10 +1,5 @@
-// src/app/page.tsx
-import ContractsList from '@/components/ContractsList';
+import ExplorerSearch from "@/components/ExplorerSearch";
 
 export default function Page() {
-  return (
-    <>
-      <ContractsList />
-    </>
-  );
+  return <ExplorerSearch />;
 }

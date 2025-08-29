@@ -8,6 +8,7 @@
       "esModuleInterop": true,
       "skipLibCheck": true,
       "resolveJsonModule": true,
-      "types": ["node"]
+      "types": ["node"],
+      "noImplicitAny": false
     }
   }
