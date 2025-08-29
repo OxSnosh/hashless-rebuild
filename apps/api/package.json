@@ -2,7 +2,7 @@
   "name": "@app/api",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --watch src --ext ts,json --exec \"node --loader ts-node/esm ./src/index.ts\"",
+    "dev": "nodemon --watch src --ext ts,graphql --exec \"ts-node --esm --transpile-only --files src/index.ts\"",
     "start": "node --loader ts-node/esm ./src/index.ts",
     "prisma": "prisma"
   },

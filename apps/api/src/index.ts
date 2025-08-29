@@ -2,104 +2,47 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { ApolloServer } from "apollo-server-express";
-import { typeDefs } from "./schema";
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+// NOTE: when using ts-node ESM, import your TS module with a .js suffix.
+import { typeDefs, resolvers } from "./schema.js";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ log: ["error", "warn"] });
 
-/** ------------ Types for GraphQL args ------------ **/
-type QueryContractArgs = { address: string };
-type QueryContractsArgs = { chain?: string; search?: string; take?: number; skip?: number };
-type QueryTransactionsArgs = { chain?: string; address?: string; take?: number; skip?: number };
+process.on("uncaughtException", (err) => {
+  console.error("🔥 Uncaught Exception:", err);
+  process.exit(1);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("🔥 Unhandled Rejection:", reason);
+});
 
-/** ------------ Resolvers ------------ **/
-const resolvers = {
-  Query: {
-    health: () => "ok",
+async function main() {
+  console.log("Booting API…");
 
-    contract: async (_: unknown, { address }: QueryContractArgs) =>
-      prisma.contract.findUnique({ where: { address: address.toLowerCase() } }),
-
-    contracts: async (_: unknown, args: QueryContractsArgs) => {
-      const where: Prisma.ContractWhereInput = {
-        ...(args.chain ? { chain: args.chain } : {}),
-        ...(args.search
-          ? {
-              OR: [
-                { address: { contains: args.search.toLowerCase() } },
-                { name: { contains: args.search } },
-              ],
-            }
-          : {}),
-      };
-
-      const rows = await prisma.contract.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        take: args.take ?? 25,
-        skip: args.skip ?? 0,
-      });
-
-      // Convert Date -> ISO for GraphQL String fields
-      return rows.map((c) => ({
-        ...c,
-        createdAt: c.createdAt.toISOString(),
-      }));
-    },
-
-    transactions: async (
-      _: unknown,
-      { chain, address, take = 50, skip = 0 }: QueryTransactionsArgs
-    ) => {
-      const addr = address?.toLowerCase();
-
-      // Build OR inline and lock the type so TS never infers `never[]`
-      const orFilters =
-        addr
-          ? ([{ fromAddress: addr }, { toAddress: addr }] satisfies Prisma.TransactionWhereInput[])
-          : undefined;
-
-      // Chain lives on related Contract
-      const where: Prisma.TransactionWhereInput = {
-        ...(orFilters ? { OR: orFilters } : {}),
-        ...(chain ? { contract: { is: { chain } } } : {}),
-      };
-
-      const txs = await prisma.transaction.findMany({
-        where,
-        orderBy: { blockNumber: "desc" }, // blockNumber is Int in your schema
-        take,
-        skip,
-        include: { contract: true },
-      });
-
-      // Convert Date -> ISO for GraphQL String fields
-      return txs.map((t) => ({
-        ...t,
-        timestamp: t.timestamp.toISOString(),
-        contract: t.contract
-          ? { ...t.contract, createdAt: t.contract.createdAt.toISOString() }
-          : null,
-      }));
-    },
-  },
-};
-
-async function start() {
   const app = express();
   app.use(cors());
+  app.use(express.json());
 
-  const server = new ApolloServer({ typeDefs, resolvers });
+  // simple health route to confirm Express is up even if Apollo fails
+  app.get("/health", (_req, res) => res.status(200).send("ok"));
+
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: async () => ({ prisma })
+  });
+
   await server.start();
-  server.applyMiddleware({ app, path: "/graphql" });
+  // @ts-ignore - apollo v3 types can be funky in ESM
+  server.applyMiddleware({ app, path: "/graphql", cors: false });
 
-  const port = process.env.PORT || 4000;
-  app.listen(port, () => {
-    console.log(`API on http://localhost:${port}${server.graphqlPath}`);
+  const PORT = Number(process.env.PORT || 4000);
+  app.listen(PORT, () => {
+    console.log(`API ready on http://localhost:${PORT}/graphql`);
   });
 }
 
-start().catch((err) => {
-  console.error(err);
+main().catch((e) => {
+  console.error("🔥 Fatal boot error:", e);
   process.exit(1);
 });

@@ -8,30 +8,29 @@ generator client {
 }
 
 model Contract {
-  id        String        @id @default(cuid())
-  address   String        @unique
-  chain     String
-  name      String?
-  createdAt DateTime      @default(now())
-  txs       Transaction[]
+  id         String         @id @default(cuid())
+  address    String
+  chain      String
+  createdAt  DateTime       @default(now())
+  txs        Transaction[]
+
+  @@unique([chain, address], name: "chain_address_unique")
 }
 
 model Transaction {
-  id          String   @id @default(cuid())
-  hash        String   @unique
-  blockNumber Int
-  timestamp   DateTime
+  id           String   @id @default(cuid())
+  hash         String
+  chain        String  
+  blockNumber  Int
+  timestamp    DateTime
+  fromAddress  String
+  toAddress    String?
+  valueWei     String?
 
-  // Optional additional fields:
-  fromAddress String
-  toAddress   String?
-  valueWei    String?   // or Decimal/BigInt if you prefer
+  contractId   String?
+  contract     Contract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
 
-  contract    Contract  @relation(fields: [contractId], references: [id])
-  contractId  String
-
-  @@index([blockNumber])
+  @@unique([chain, hash], name: "chain_hash_unique")
+  @@index([blockNumber, chain])
   @@index([contractId])
-  @@index([fromAddress])
-  @@index([toAddress])
 }
