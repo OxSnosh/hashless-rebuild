@@ -10,7 +10,8 @@
       "resolveJsonModule": true,
       "allowSyntheticDefaultImports": true,
       "verbatimModuleSyntax": true,
-      "noEmit": true
+      "noEmit": true,
+      "allowImportingTsExtensions": true 
     },
     "ts-node": {
       "esm": true,

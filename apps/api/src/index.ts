@@ -4,7 +4,7 @@ import cors from "cors";
 import { ApolloServer } from "apollo-server-express";
 import { PrismaClient } from "@prisma/client";
 // NOTE: when using ts-node ESM, import your TS module with a .js suffix.
-import { typeDefs, resolvers } from "./schema.js";
+import { typeDefs, resolvers } from "./schema.ts";
 
 const prisma = new PrismaClient({ log: ["error", "warn"] });
 
